@@ -96,7 +96,7 @@ namespace ApcConverter
                 throw new ArgumentException("Certificate does not have a valid start tag", nameof(source));
             }
 
-            var name = source.Substring(startPattern.Length, nameEnd - startPattern.Length);
+            var name = source[startPattern.Length..nameEnd];
 
             startPattern = $"-----BEGIN {name}-----";
             var endPattern = $"-----END {name}-----";
@@ -108,9 +108,8 @@ namespace ApcConverter
 
             source = source.Replace("\n", "").Replace("\r", "");
 
-            source = source.Replace(startPattern, startPattern + "\\n");
-
-            source = source.Replace(endPattern, "\\n" + endPattern);
+            source = source.Replace(startPattern, startPattern + "\n");
+            source = source.Replace(endPattern, "\n" + endPattern);
 
             return source;
         }

@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace ApcConverter
 {
@@ -145,7 +147,22 @@ namespace ApcConverter
             {
                 throw new ParseException("Could not find Private Key");
             }
-            return ExtractCertificate(certificate);
+
+            var cert = ExtractCertificate(certificate);
+
+            if (cert.StartsWith("-----BEGIN PRIVATE KEY-----"))
+            {
+                var rsa = RSA.Create();
+                rsa.ImportFromPem(cert.ToCharArray());
+
+                var bytes = rsa.ExportRSAPrivateKey();
+                var base64 = Convert.ToBase64String(bytes);
+                var start = "-----BEGIN RSA PRIVATE KEY-----\n";
+                var end = "\n-----END RSA PRIVATE KEY-----";
+                cert = start + base64 + end;
+            }
+
+            return cert;
         }
 
         private string GetCertificate(byte marker, string name)
